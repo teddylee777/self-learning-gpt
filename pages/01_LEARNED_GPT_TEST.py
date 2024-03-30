@@ -18,6 +18,7 @@ st.title("🦜 Self Learning GPT 테스트")
 # API KEY 설정
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_PROJECT"] = "SELF_LEARNING_GPT"
 
 # secrets.toml 파일에 저장된 API KEY를 사용할 때
 # os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
