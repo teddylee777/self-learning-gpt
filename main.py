@@ -50,14 +50,16 @@ with st.sidebar:
     project_name = st.text_input("LangSmith 프로젝트", value="SELF_LEARNING_GPT")
     session_id = st.text_input("세션 ID(선택사항)")
 
-langchain_endpoint = "https://api.smith.langchain.com"
-if not langchain_api_key:
+if not check_if_key_exists("langchain_api_key"):
     st.info(
         "⚠️ [LangSmith API key](https://python.langchain.com/docs/guides/langsmith/walkthrough) 를 추가해 주세요."
     )
 else:
+    langchain_endpoint = "https://api.smith.langchain.com"
     # LangSmith 설정
-    client = Client(api_url=langchain_endpoint, api_key=langchain_api_key)
+    client = Client(
+        api_url=langchain_endpoint, api_key=st.session_state["langchain_api_key"]
+    )
     ls_tracer = LangChainTracer(project_name=project_name, client=client)
     run_collector = RunCollectorCallbackHandler()
     cfg = RunnableConfig()
@@ -83,9 +85,9 @@ class StreamHandler(BaseCallbackHandler):
 msgs = StreamlitChatMessageHistory(key="langchain_messages")
 
 
-if len(msgs.messages) == 0 or reset_history:
+if reset_history:
     msgs.clear()
-    msgs.add_ai_message("무엇을 도와드릴까요?")
+    # msgs.add_ai_message("무엇을 도와드릴까요?")
     st.session_state["last_run"] = None
     st.session_state.messages = []
     st.session_state.query = None
@@ -104,7 +106,9 @@ with st.sidebar:
 
 # 유저의 입력을 받아서 대화를 진행합니다.
 if user_input := st.chat_input():
-    if openai_api_key and langchain_api_key:
+    if check_if_key_exists("openai_api_key") and check_if_key_exists(
+        "langchain_api_key"
+    ):
         cfg["configurable"] = {"session_id": session_id}
         if st.session_state.query is None:
             st.session_state.query = user_input
@@ -116,7 +120,9 @@ if user_input := st.chat_input():
         with st.chat_message("assistant"):
             stream_handler = StreamHandler(st.empty())
             llm = ChatOpenAI(
-                streaming=True, callbacks=[stream_handler], api_key=openai_api_key
+                streaming=True,
+                callbacks=[stream_handler],
+                api_key=st.session_state["openai_api_key"],
             )
             prompt = ChatPromptTemplate.from_messages(
                 [

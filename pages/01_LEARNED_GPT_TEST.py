@@ -143,7 +143,11 @@ if user_input := st.chat_input():
         st.chat_message("user").write(user_input)
         with st.chat_message("assistant"):
             stream_handler = StreamHandler(st.empty())
-            llm = ChatOpenAI(streaming=True, callbacks=[stream_handler])
+            llm = ChatOpenAI(
+                streaming=True,
+                callbacks=[stream_handler],
+                api_key=st.session_state["openai_api_key"],
+            )
             if "examples" not in st.session_state:
                 st.session_state.examples = []
 
